@@ -1,0 +1,91 @@
+rules:
+  - id: java-crypto-detection
+    patterns:
+      - pattern: import javax.crypto.$CLASS;
+      - pattern: import java.security.$CLASS;
+    message: "Usage of cryptographic library detected"
+    languages: [java]
+    severity: WARNING
+
+  - id: terraform-crypto-detection
+    patterns:
+      - pattern: resource "aws_kms_$RESOURCE" {...}
+      - pattern: module "encryption_module" {...}
+    message: "Usage of cryptographic resource detected"
+    languages: [terraform]
+    severity: WARNING
+
+  - id: python-crypto-detection
+    patterns:
+      - pattern: import cryptography
+      - pattern: import hashlib
+      - pattern: import hmac
+      - pattern: from cryptography.$MODULE import $CLASS
+      - pattern: from hashlib import $CLASS
+      - pattern: from hmac import $CLASS
+    message: "Usage of cryptographic library detected"
+    languages: [python]
+    severity: WARNING
+
+  - id: ansible-crypto-detection
+    patterns:
+      - pattern: module: openssl_*
+      - pattern: module: community.crypto.*
+    message: "Usage of cryptographic module detected"
+    languages: [yaml]
+    severity: WARNING
+
+  - id: bash-crypto-detection
+    patterns:
+      - pattern: openssl $ARGS
+      - pattern: gpg $ARGS
+      - pattern: sha256sum $ARGS
+    message: "Usage of cryptographic command detected"
+    languages: [bash]
+    severity: WARNING
+
+  - id: nginx-crypto-detection
+    patterns:
+      - pattern: ssl_certificate $ARGS;
+      - pattern: ssl_certificate_key $ARGS;
+      - pattern: ssl_protocols $ARGS;
+      - pattern: ssl_ciphers $ARGS;
+    message: "Usage of cryptographic configuration detected in Nginx"
+    languages: [nginx]
+    severity: WARNING
+
+  - id: envoy-crypto-detection
+    patterns:
+      - pattern: tls_context:
+      - pattern: validation_context:
+      - pattern: common_tls_context:
+    message: "Usage of cryptographic configuration detected in Envoy"
+    languages: [yaml]
+    severity: WARNING
+
+  - id: istio-crypto-detection
+    patterns:
+      - pattern: |
+          spec:
+            tls:
+              mode: $MODE
+      - pattern: |
+          spec:
+            tls:
+              credentialName: $CREDENTIAL
+      - pattern: |
+          spec:
+            mtls:
+              mode: $MTLS_MODE
+      - pattern: |
+          tls:
+            mode: $MODE
+      - pattern: |
+          tls:
+            credentialName: $CREDENTIAL
+      - pattern: |
+          mtls:
+            mode: $MTLS_MODE
+    message: "Usage of cryptographic configuration detected in Istio"
+    languages: [yaml]
+    severity: WARNING
