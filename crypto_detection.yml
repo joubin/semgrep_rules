@@ -29,8 +29,8 @@ rules:
 
   - id: ansible-crypto-detection
     patterns:
-      - pattern: module: openssl_*
-      - pattern: module: community.crypto.*
+      - pattern: "module: openssl_*"
+      - pattern: "module: community.crypto.*"
     message: "Usage of cryptographic module detected"
     languages: [yaml]
     severity: WARNING
@@ -51,14 +51,14 @@ rules:
       - pattern: ssl_protocols $ARGS;
       - pattern: ssl_ciphers $ARGS;
     message: "Usage of cryptographic configuration detected in Nginx"
-    languages: [nginx]
+    languages: [generic]
     severity: WARNING
 
   - id: envoy-crypto-detection
     patterns:
-      - pattern: tls_context:
-      - pattern: validation_context:
-      - pattern: common_tls_context:
+      - pattern: "tls_context:"
+      - pattern: "validation_context:"
+      - pattern: "common_tls_context:"
     message: "Usage of cryptographic configuration detected in Envoy"
     languages: [yaml]
     severity: WARNING
@@ -89,3 +89,6 @@ rules:
     message: "Usage of cryptographic configuration detected in Istio"
     languages: [yaml]
     severity: WARNING
+    paths:
+      - "**/*.yaml"
+      - "**/*.yml"
