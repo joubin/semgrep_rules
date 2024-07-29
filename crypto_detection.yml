@@ -1,94 +1,157 @@
 rules:
-  - id: java-crypto-detection
-    patterns:
-      - pattern: import javax.crypto.$CLASS;
-      - pattern: import java.security.$CLASS;
-    message: "Usage of cryptographic library detected"
+  - id: java-crypto-usage
+    pattern-either:
+      - pattern: import javax.crypto.*
+      - pattern: import java.security.*
+    message: "Java cryptography library usage detected"
     languages: [java]
-    severity: WARNING
+    severity: INFO
 
-  - id: terraform-crypto-detection
-    patterns:
-      - pattern: resource "aws_kms_$RESOURCE" {...}
-      - pattern: module "encryption_module" {...}
-    message: "Usage of cryptographic resource detected"
-    languages: [terraform]
-    severity: WARNING
-
-  - id: python-crypto-detection
-    patterns:
+  - id: python-crypto-usage
+    pattern-either:
       - pattern: import cryptography
+      - pattern: from cryptography import *
       - pattern: import hashlib
-      - pattern: import hmac
-      - pattern: from cryptography.$MODULE import $CLASS
-      - pattern: from hashlib import $CLASS
-      - pattern: from hmac import $CLASS
-    message: "Usage of cryptographic library detected"
+      - pattern: import ssl
+    message: "Python cryptography library usage detected"
     languages: [python]
-    severity: WARNING
+    severity: INFO
 
-  - id: ansible-crypto-detection
-    patterns:
-      - pattern: "module: openssl_*"
-      - pattern: "module: community.crypto.*"
-    message: "Usage of cryptographic module detected"
+  - id: javascript-crypto-usage
+    pattern-either:
+      - pattern: require('crypto')
+      - pattern: import * from 'crypto'
+      - pattern: window.crypto
+    message: "JavaScript cryptography library usage detected"
+    languages: [javascript, typescript]
+    severity: INFO
+
+  - id: terraform-crypto-settings
+    pattern-either:
+      - pattern: resource "aws_kms_key" ...
+      - pattern: resource "azurerm_key_vault" ...
+      - pattern: resource "google_kms_crypto_key" ...
+    message: "Terraform cryptography resource detected"
+    languages: [hcl]
+    severity: INFO
+
+  - id: ansible-crypto-tasks
+    pattern-either:
+      - pattern: openssl_*
+      - pattern: community.crypto.*
+    message: "Ansible cryptography task detected"
     languages: [yaml]
-    severity: WARNING
+    severity: INFO
 
-  - id: bash-crypto-detection
-    patterns:
-      - pattern: openssl $ARGS
-      - pattern: gpg $ARGS
-      - pattern: sha256sum $ARGS
-    message: "Usage of cryptographic command detected"
-    languages: [bash]
-    severity: WARNING
+  - id: packer-crypto-settings
+    pattern-either:
+      - pattern: "kms_key_id"
+      - pattern: "encrypt_boot"
+    message: "Packer cryptography setting detected"
+    languages: [json, hcl]
+    severity: INFO
 
-  - id: nginx-crypto-detection
-    patterns:
-      - pattern: ssl_certificate $ARGS;
-      - pattern: ssl_certificate_key $ARGS;
-      - pattern: ssl_protocols $ARGS;
-      - pattern: ssl_ciphers $ARGS;
-    message: "Usage of cryptographic configuration detected in Nginx"
+  - id: redhat-crypto-config
+    pattern-either:
+      - pattern: /etc/crypto-policies/
+      - pattern: CRYPTO_POLICY=
+    message: "Red Hat cryptography policy configuration detected"
     languages: [generic]
-    severity: WARNING
+    severity: INFO
 
-  - id: envoy-crypto-detection
-    patterns:
-      - pattern: "tls_context:"
-      - pattern: "validation_context:"
-      - pattern: "common_tls_context:"
-    message: "Usage of cryptographic configuration detected in Envoy"
-    languages: [yaml]
-    severity: WARNING
+  - id: aws-crypto-services
+    pattern-either:
+      - pattern: "aws_kms_"
+      - pattern: "aws_cloudhsm_"
+      - pattern: "aws_acm_"
+    message: "AWS cryptography service usage detected"
+    languages: [hcl, yaml, json]
+    severity: INFO
 
-  - id: istio-crypto-detection
-    patterns:
-      - pattern: |
-          spec:
-            tls:
-              mode: $MODE
-      - pattern: |
-          spec:
-            tls:
-              credentialName: $CREDENTIAL
-      - pattern: |
-          spec:
-            mtls:
-              mode: $MTLS_MODE
-      - pattern: |
-          tls:
-            mode: $MODE
-      - pattern: |
-          tls:
-            credentialName: $CREDENTIAL
-      - pattern: |
-          mtls:
-            mode: $MTLS_MODE
-    message: "Usage of cryptographic configuration detected in Istio"
-    languages: [yaml]
-    severity: WARNING
-    paths:
-      - "**/*.yaml"
-      - "**/*.yml"
+  - id: nginx-crypto-config
+    pattern-either:
+      - pattern: ssl_certificate
+      - pattern: ssl_certificate_key
+      - pattern: ssl_protocols
+      - pattern: ssl_ciphers
+      - pattern: ssl_prefer_server_ciphers
+      - pattern: ssl_dhparam
+      - pattern: ssl_ecdh_curve
+      - pattern: ssl_session_tickets
+      - pattern: ssl_stapling
+      - pattern: ssl_stapling_verify
+    message: "Nginx SSL/TLS configuration detected"
+    languages: [generic]
+    severity: INFO
+
+  - id: nginx-http2-config
+    pattern: http2
+    message: "Nginx HTTP/2 configuration detected (implies SSL/TLS)"
+    languages: [generic]
+    severity: INFO
+
+
+
+  - id: general-crypto-terms
+    pattern-either:
+      - pattern: encrypt
+      - pattern: decrypt
+      - pattern: hash
+      - pattern: signature
+      - pattern: certificate
+      - pattern: private_key
+      - pattern: public_key
+    message: "General cryptography-related term detected"
+    languages: [generic]
+    severity: INFO
+
+  - id: go-crypto-usage
+    pattern-either:
+      - pattern: import "crypto/..."
+      - pattern: import "golang.org/x/crypto/..."
+    message: "Go cryptography library usage detected"
+    languages: [go]
+    severity: INFO
+
+  - id: ruby-crypto-usage
+    pattern-either:
+      - pattern: require 'openssl'
+      - pattern: require 'digest'
+    message: "Ruby cryptography library usage detected"
+    languages: [ruby]
+    severity: INFO
+
+  - id: php-crypto-usage
+    pattern-either:
+      - pattern: openssl_*
+      - pattern: mcrypt_*
+      - pattern: hash(...)
+    message: "PHP cryptography function usage detected"
+    languages: [php]
+    severity: INFO
+
+  - id: crypto-config-files
+    pattern-either:
+      - pattern: /ssl.conf/
+      - pattern: /tls.conf/
+    message: "Potential SSL/TLS configuration file detected"
+    languages: [generic]
+    severity: INFO
+
+  - id: crypto-cli-tools
+    pattern-either:
+      - pattern: openssl
+      - pattern: gpg
+      - pattern: keytool
+    message: "Cryptography-related command-line tool usage detected"
+    languages: [generic, bash]
+    severity: INFO
+
+  - id: docker-crypto-config
+    pattern-either:
+      - pattern: EXPOSE 443
+      - pattern: ENV SSL_CERT_*
+      - pattern: ENV HTTPS_*
+    message: "Docker SSL/TLS-related configuration detected"
+    languages: [dockerfile]
+    severity: INFO
